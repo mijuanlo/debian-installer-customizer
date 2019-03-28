@@ -2,7 +2,7 @@
 # BEGIN CUSTOMIZATIONS
 
 # DEBUG FLAG INCREASES VERBOSITY
-DEBUG=0
+DEBUG=1
 # WHICH DISTRIBUTION MUST I PICK UP UDEBS
 DISTRIBUTION_UDEBS=bionic
 # WHICH DISTRIBUTION MUST I PICK UP THE INSTALLER SOURCE CODE
@@ -24,13 +24,15 @@ INSTALL_EXTRA_PACKAGES="libtextwrap1"
 # ALLOW TO CLEAN OR MANTAIN USED COMPILATION FILES
 CLEAN_TMPFILES=1
 # AUTOREBUILD INITRD TO BLACKLIST SOME MODULES OR APPEND MISSING MODULES FROM DISTRIBUTED INITRD BOOT IMAGE
-AUTOREBUILD=0
+AUTOREBUILD=1
 # REMOVE UDEBS FROM INSTALLER
 # BLACKLIST_UDEBS="cdebconf|cdrom-|iso-scan|load-"
 BLACKLIST_UDEBS="cdrom|iso-scan|load-"
+BLACKLIST_UDEBS=" "
 # REPO COMPONENTS WHERE NEEDED UDEBS ARE INTO PACKAGE REPOSITORY
 UDEBS_FROM_COMPONENTS="main/debian-installer,universe/debian-installer"
-
+# FORCE UDEBS
+FORCE_UDEBS="lliurex-keyring-udeb"
 # END CUSTOMIZATIONS
 
 NC='\033[0m'
@@ -228,6 +230,16 @@ run_safe dpkg-buildpackage -us -uc
 run popd
 }
 
+add_forced_udebs(){
+set -x
+msg "Adding forced udeb: $FORCED_UDEBS"
+run_safe cp localudebs/* ./$SRC_ARCH/$DIR_INSTALLER/build/localudebs/
+file_to_append=$(find $SRC_ARCH -type f -name 'gtk-common')
+for udeb in "$(echo $FORCE_UDEBS)"; do
+    echo $udeb >> $file_to_append
+done;
+}
+
 customize_initrd(){
 
 if [ -z "$INIT_DIR" -o -z "$SRC_ARCH" ]; then 
@@ -350,6 +362,7 @@ clean_environment(){
 
 build(){
     patch_netinstall
+    add_forced_udebs
     build_installer
     customize_initrd
 }
