@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+DIST=$3
+INSTALLER_FROM=$4
+FILE=debian/rules
+sed -i -r "s%^SUITE[ ]*=.*%SUITE = $DIST%g" $FILE
+sed -i -r "s%^USE_UDEBS_FROM[ ]*=.*%USE_UDEBS_FROM = $DIST%g" $FILE
+exit

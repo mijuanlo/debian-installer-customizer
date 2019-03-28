@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+ARCH=$1
+FILE=build/config/$ARCH.cfg
+sed -i -r 's%MEDIUM_SUPPORTED[ ]*=.*$%MEDIUM_SUPPORTED = netboot-gtk%g' $FILE
+exit

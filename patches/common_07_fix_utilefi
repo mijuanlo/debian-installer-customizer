@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+FILE=build/util/efi-image
+
+sed -r -i 's%apt-cache%LANG=C apt-cache%g' $FILE
+
+exit

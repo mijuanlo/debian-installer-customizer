@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+exclude_fonts="tamil malayalam kannada telugu tibetan thai abyssinica cjk khmeros"
+FILE=build/pkg-lists/gtk-common
+for font in $exclude_fonts; do
+    reg="^\s*[^#]*(\w|-)+${font}(\w|-)+\s*$"
+    # true to allow empty result due to set -e
+    namefont="$(egrep -o "$reg" $FILE || true)"
+    if [ "x$namefont" != "x" ]; then
+	sed -i -r "s%$namefont%#$namefont%g" $FILE
+    fi
+done
+exit

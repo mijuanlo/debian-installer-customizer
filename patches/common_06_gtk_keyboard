@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+exit 
+add_packages="xkb-data-udeb x11-xkb-utils-udeb libmtdev1-udeb libpng12-0-udeb libgtk2.0-0-udeb libgdk-pixbuf2.0-0-udeb"
+FILE=build/pkg-lists/gtk-common
+
+for package in $add_packages; do
+    exits=$(grep $package $FILE|wc -l)
+    if [ "x$exists" != "x1" ]; then
+	echo $package >> $FILE
+    fi
+done
+
+exit

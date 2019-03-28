@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+DIST=$3
+UDEBS_FROM=$3
+INSTALLER_FROM=$4
+UDEB_COMPONENTS=$5
+UDEB_COMPONENTS=$(echo $UDEB_COMPONENTS|tr ',' ' ')
+REPO=$6
+
+FILE=build/config/common
+
+
+sed -i -r "s%\s*[#]*\s*DEBIAN_RELEASE.*%DEBIAN_RELEASE = $DIST%g" $FILE
+sed -i -r "s%\s*[#]*\s*USE_UDEBS_FROM[^_].*%USE_UDEBS_FROM ?= $UDEBS_FROM%g" $FILE
+sed -i -r "s%\s*[#]*\s*MIRROR\s*=.*%MIRROR=$REPO%g" $FILE
+sed -i -r "s%\s*[#]*\s*USE_UDEBS_FROM_EXTRA.*%USE_UDEBS_FROM_EXTRA ?= $UDEBS_FROM-security $UDEBS_FROM-proposed $UDEBS_FROM-updates%g" $FILE
+sed -i -r "s%\s*[#]*\s*UDEB_COMPONENTS.*%UDEB_COMPONENTS ?= $UDEB_COMPONENTS%g" $FILE
+
+#echo DEBIAN_RELEASE = $DIST >> $FILE
+#echo USE_UDEBS_FROM ?= $UDEBS_FROM >> $FILE
+#echo MIRROR = $REPO >> $FILE
+#echo USE_UDEBS_FROM_EXTRA ?= $UDEBS_FROM-security $UDEBS_FROM-proposed $UDEBS_FROM-updates >> $FILE
+#echo UDEB_COMPONENTS ?= $UDEB_COMPONENTS >> $FILE
+exit

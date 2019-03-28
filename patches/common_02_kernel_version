@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+ARCH=$1
+KERNEL=$2
+FILE=build/config/$ARCH.cfg
+sed -i -r "s%BASEVERSION[ ]*=.*%BASEVERSION = $KERNEL%g" $FILE
+exit
