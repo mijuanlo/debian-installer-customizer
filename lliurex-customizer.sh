@@ -13,6 +13,7 @@ KERNEL_X86="4.15.0-20"
 KERNEL_AMD64="4.15.0-20"
 # MAIN REPO TO GET SOURCES
 REPO=http://ubuntu.cica.es/ubuntu
+REPO=http://mirror.tedra.es/ubuntu
 # REPO FROM UDEBS
 REPO_UDEBS=$REPO
 # REPO FOR GET THE DISTRIBUTED KERNEL & INITRD BUILT BY UBUNTU
@@ -24,15 +25,18 @@ INSTALL_EXTRA_PACKAGES="libtextwrap1"
 # ALLOW TO CLEAN OR MANTAIN USED COMPILATION FILES
 CLEAN_TMPFILES=1
 # AUTOREBUILD INITRD TO BLACKLIST SOME MODULES OR APPEND MISSING MODULES FROM DISTRIBUTED INITRD BOOT IMAGE
-AUTOREBUILD=1
+AUTOREBUILD=0
 # REMOVE UDEBS FROM INSTALLER
 # BLACKLIST_UDEBS="cdebconf|cdrom-|iso-scan|load-"
 BLACKLIST_UDEBS="cdrom|iso-scan|load-"
-BLACKLIST_UDEBS=" "
+#BLACKLIST_UDEBS="cdrom|iso-scan"
+#BLACKLIST_UDEBS=" "
 # REPO COMPONENTS WHERE NEEDED UDEBS ARE INTO PACKAGE REPOSITORY
 UDEBS_FROM_COMPONENTS="main/debian-installer,universe/debian-installer"
 # FORCE UDEBS
+KERNEL_UDEB_VERSION="4.15.0-20"
 FORCE_UDEBS="lliurex-keyring-udeb"
+FORCE_UDEBS="$FORCE_UDEBS block-modules-$KERNEL_UDEB_VERSION-generic-di file-preseed firewire-core-modules-$KERNEL_UDEB_VERSION-generic-di fs-core-modules-$KERNEL_UDEB_VERSION-generic-di fs-secondary-modules-$KERNEL_UDEB_VERSION-generic-di hdparm-udeb message-modules-$KERNEL_UDEB_VERSION-generic-di parport-modules-$KERNEL_UDEB_VERSION-generic-di pata-modules-$KERNEL_UDEB_VERSION-generic-di pcmcia-storage-modules-$KERNEL_UDEB_VERSION-generic-di sata-modules-$KERNEL_UDEB_VERSION-generic-di scsi-firmware scsi-modules-$KERNEL_UDEB_VERSION-generic-di"
 # END CUSTOMIZATIONS
 
 NC='\033[0m'
@@ -69,7 +73,13 @@ run_safe(){
     fi
     if [ "$RET" != "0" ]; then
 	errmsg Error!
-	salida
+	msg "ENTERING DEBUG TERMINAL"
+	bash
+	echo -n "Abort process y/n " 
+	read r
+	if [ "x$r" = "xy" ]; then
+	    salida
+	fi
     fi 
 }
 
@@ -231,7 +241,6 @@ run popd
 }
 
 add_forced_udebs(){
-set -x
 msg "Adding forced udeb: $FORCED_UDEBS"
 run_safe cp localudebs/* ./$SRC_ARCH/$DIR_INSTALLER/build/localudebs/
 file_to_append=$(find $SRC_ARCH -type f -name 'gtk-common')
@@ -309,7 +318,7 @@ check_udebs(){
     msg "Checking udebs included"
     cat $DEST/distro-udeb-orig-$ARCHNAME.list |cut  -d' ' -f1|perl -pe 's%(.+?)-([0-9\-\.])+-generic-di%\1%'|sort|uniq > $TMP_DIR/udeb-orig-filtered.list
     cat $DEST/udeb.list |cut  -d' ' -f1|perl -pe 's%(.+?)-([0-9\-\.])+-generic-di%\1%'|sort|uniq > $TMP_DIR/udeb-filtered.list
-
+    cat $DEST/udeb.list
     comm -23 $TMP_DIR/udeb-orig-filtered.list $TMP_DIR/udeb-filtered.list > $TMP_DIR/udeb-not-included.list
 
     rebuild=0
@@ -332,7 +341,6 @@ check_udebs(){
     else
 	rebuild=1
     fi
-
     if [ "x$rebuild" = "x1" ]; then
         if [ -z "$BLACKLIST_UDEBS" ]; then
             msg "No modules blacklisted"

@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+grep -lir 'ubuntu-keyring-udeb' build|egrep -v 'control|changelog'|xargs -n1 sed -i -r 's%ubuntu-keyring-udeb%lliurex-keyring-udeb%g'
+
+exit
