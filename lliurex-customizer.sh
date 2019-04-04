@@ -323,21 +323,22 @@ check_udebs(){
 
     rebuild=0
     if [ "x$AUTOREBUILD" != "x1" ]; then
-    echo "List udebs not included in this build and included into original installer"
-    if [ -n "$BLACKLIST_UDEBS" ];then
-	cat  $TMP_DIR/udeb-not-included.list |sed -r "s%(.+)-modules\$%\1-modules-$KERNEL-generic-di%g"|egrep -v "$BLACKLIST_UDEBS"
-    else
-	cat  $TMP_DIR/udeb-not-included.list
-    fi
-    while true; do
-    read -p "Do you wish to retry build including this udebs? " yn
-	case $yn in
-    	    [Yy]* ) rebuild=1; break;;
-    	    [Nn]* ) break;;
-    	    * ) echo "Please answer yes or no.";;
-	esac
-    done
-
+        echo "List udebs not included in this build and included into original installer"
+        if [ -n "$BLACKLIST_UDEBS" ];then
+        	NOT_INCLUDED=`cat  $TMP_DIR/udeb-not-included.list |sed -r "s%(.+)-modules\$%\1-modules-$KERNEL-generic-di%g"|egrep -v "$BLACKLIST_UDEBS"`
+        else
+        	NOT_INCLUDED=`cat  $TMP_DIR/udeb-not-included.list`
+        fi
+        if [ "x$NOT_INCLUDED" != "x" ];then
+            while true; do
+            read -p "Do you wish to retry build including this udebs? " yn
+        	    case $yn in
+        	        [Yy]* ) rebuild=1; break;;
+        	        [Nn]* ) break;;
+        	        * ) echo "Please answer yes or no.";;
+        	    esac
+            done
+        fi
     else
 	rebuild=1
     fi
