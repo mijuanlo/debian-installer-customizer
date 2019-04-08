@@ -74,7 +74,7 @@ run_safe(){
     fi
     if [ "$RET" != "0" ]; then
 	errmsg Error!
-	msg "ENTERING DEBUG TERMINAL"
+	msg "ENTERING DEBUG TERMINAL (command failed: '$@')"
 	bash
 	echo -n "Abort process y/n " 
 	read r
