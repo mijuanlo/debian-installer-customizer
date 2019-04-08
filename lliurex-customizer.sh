@@ -7,10 +7,11 @@ DEBUG=1
 DISTRIBUTION_UDEBS=bionic
 # WHICH DISTRIBUTION MUST I PICK UP THE INSTALLER SOURCE CODE
 DISTRIBUTION_INSTALLER=disco
+KERNEL="4.15.0-46"
 # WHICH KERNEL USE FOR X86
-KERNEL_X86="4.15.0-20"
+KERNEL_X86=$KERNEL
 # WHICH KERNEL USE FOR AMD64
-KERNEL_AMD64="4.15.0-20"
+KERNEL_AMD64=$KERNEL
 # MAIN REPO TO GET SOURCES
 REPO=http://ubuntu.cica.es/ubuntu
 REPO=http://mirror.tedra.es/ubuntu
@@ -34,7 +35,7 @@ BLACKLIST_UDEBS="cdrom|iso-scan|load-"
 # REPO COMPONENTS WHERE NEEDED UDEBS ARE INTO PACKAGE REPOSITORY
 UDEBS_FROM_COMPONENTS="main/debian-installer,universe/debian-installer"
 # FORCE UDEBS
-KERNEL_UDEB_VERSION="4.15.0-20"
+KERNEL_UDEB_VERSION="$KERNEL"
 FORCE_UDEBS="lliurex-keyring-udeb"
 FORCE_UDEBS="$FORCE_UDEBS block-modules-$KERNEL_UDEB_VERSION-generic-di file-preseed firewire-core-modules-$KERNEL_UDEB_VERSION-generic-di fs-core-modules-$KERNEL_UDEB_VERSION-generic-di fs-secondary-modules-$KERNEL_UDEB_VERSION-generic-di hdparm-udeb message-modules-$KERNEL_UDEB_VERSION-generic-di parport-modules-$KERNEL_UDEB_VERSION-generic-di pata-modules-$KERNEL_UDEB_VERSION-generic-di pcmcia-storage-modules-$KERNEL_UDEB_VERSION-generic-di sata-modules-$KERNEL_UDEB_VERSION-generic-di scsi-firmware scsi-modules-$KERNEL_UDEB_VERSION-generic-di"
 # END CUSTOMIZATIONS
