@@ -7,7 +7,7 @@ DEBUG=1
 DISTRIBUTION_UDEBS=xenial
 # WHICH DISTRIBUTION MUST I PICK UP THE INSTALLER SOURCE CODE
 DISTRIBUTION_INSTALLER=xenial
-KERNEL="4.4.0-165"
+KERNEL="4.15.0-65"
 # WHICH KERNEL USE FOR X86
 KERNEL_X86=$KERNEL
 # WHICH KERNEL USE FOR AMD64
@@ -24,9 +24,9 @@ REPO_INSTALLER=$REPO
 # PACKAGES NEEDED TO COMPLETE BUILD PROCESS
 INSTALL_EXTRA_PACKAGES="libtextwrap1"
 # ALLOW TO CLEAN OR MANTAIN USED COMPILATION FILES
-CLEAN_TMPFILES=0
+CLEAN_TMPFILES=1
 # AUTOREBUILD INITRD TO BLACKLIST SOME MODULES OR APPEND MISSING MODULES FROM DISTRIBUTED INITRD BOOT IMAGE
-AUTOREBUILD=0
+AUTOREBUILD=1
 # REMOVE UDEBS FROM INSTALLER
 # BLACKLIST_UDEBS="cdebconf|cdrom-|iso-scan|load-"
 BLACKLIST_UDEBS="cdrom|iso-scan|load-"
@@ -36,8 +36,10 @@ BLACKLIST_UDEBS="cdrom|iso-scan|load-"
 UDEBS_FROM_COMPONENTS="main/debian-installer,universe/debian-installer"
 # FORCE UDEBS
 KERNEL_UDEB_VERSION="$KERNEL"
-FORCE_UDEBS="lliurex-keyring-udeb"
-FORCE_UDEBS="$FORCE_UDEBS block-modules-$KERNEL_UDEB_VERSION-generic-di file-preseed firewire-core-modules-$KERNEL_UDEB_VERSION-generic-di fs-core-modules-$KERNEL_UDEB_VERSION-generic-di fs-secondary-modules-$KERNEL_UDEB_VERSION-generic-di hdparm-udeb message-modules-$KERNEL_UDEB_VERSION-generic-di parport-modules-$KERNEL_UDEB_VERSION-generic-di pata-modules-$KERNEL_UDEB_VERSION-generic-di pcmcia-storage-modules-$KERNEL_UDEB_VERSION-generic-di sata-modules-$KERNEL_UDEB_VERSION-generic-di scsi-firmware scsi-modules-$KERNEL_UDEB_VERSION-generic-di"
+FORCE_UDEBS=""
+#FORCE_UDEBS="lliurex-keyring-udeb"
+#FORCE_UDEBS="$FORCE_UDEBS block-modules-$KERNEL_UDEB_VERSION-generic-di file-preseed firewire-core-modules-$KERNEL_UDEB_VERSION-generic-di fs-core-modules-$KERNEL_UDEB_VERSION-generic-di fs-secondary-modules-$KERNEL_UDEB_VERSION-generic-di hdparm-udeb message-modules-$KERNEL_UDEB_VERSION-generic-di parport-modules-$KERNEL_UDEB_VERSION-generic-di pata-modules-$KERNEL_UDEB_VERSION-generic-di pcmcia-storage-modules-$KERNEL_UDEB_VERSION-generic-di sata-modules-$KERNEL_UDEB_VERSION-generic-di scsi-firmware scsi-modules-$KERNEL_UDEB_VERSION-generic-di"
+DEPENDENCIES="wget dpkg-dev debootstrap"
 # END CUSTOMIZATIONS
 
 NC='\033[0m'
@@ -75,7 +77,9 @@ run_safe(){
     if [ "$RET" != "0" ]; then
 	errmsg Error!
 	msg "ENTERING DEBUG TERMINAL (command failed: '$@')"
-	bash
+        PS1BKP="$PS1"
+        PS1="RECOVERY-\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$" bash --noprofile --norc
+        PS1="$PS1BKP"
 	echo -n "Abort process y/n " 
 	read r
 	if [ "x$r" = "xy" ]; then
@@ -243,11 +247,15 @@ run popd
 
 add_forced_udebs(){
 msg "Adding forced udeb: $FORCED_UDEBS"
-run_safe cp localudebs/* ./$SRC_ARCH/$DIR_INSTALLER/build/localudebs/
-file_to_append=$(find $SRC_ARCH -type f -name 'gtk-common')
-for udeb in "$(echo $FORCE_UDEBS)"; do
-    echo $udeb >> $file_to_append
-done;
+if [ ! -d localudebs ]; then
+    msg "Empty directory localudebs"
+else
+    run_safe cp localudebs/* ./$SRC_ARCH/$DIR_INSTALLER/build/localudebs/
+    file_to_append=$(find $SRC_ARCH -type f -name 'gtk-common')
+    for udeb in "$(echo $FORCE_UDEBS)"; do
+        echo $udeb >> $file_to_append
+    done;
+fi
 }
 
 customize_initrd(){
@@ -324,12 +332,13 @@ check_udebs(){
 
     rebuild=0
     if [ "x$AUTOREBUILD" != "x1" ]; then
-        echo "List udebs not included in this build and included into original installer"
+        echo "Below are listed udebs not included in this build and included into original installer"
         if [ -n "$BLACKLIST_UDEBS" ];then
         	NOT_INCLUDED=`cat  $TMP_DIR/udeb-not-included.list |sed -r "s%(.+)-modules\$%\1-modules-$KERNEL-generic-di%g"|egrep -v "$BLACKLIST_UDEBS"`
         else
         	NOT_INCLUDED=`cat  $TMP_DIR/udeb-not-included.list`
         fi
+        echo $NOT_INCLUDED
         if [ "x$NOT_INCLUDED" != "x" ];then
             while true; do
             read -p "Do you wish to retry build including this udebs? " yn
