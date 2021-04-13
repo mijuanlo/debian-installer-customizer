@@ -4,10 +4,10 @@
 # DEBUG FLAG INCREASES VERBOSITY
 DEBUG=1
 # WHICH DISTRIBUTION MUST I PICK UP UDEBS
-DISTRIBUTION_UDEBS=bionic
+DISTRIBUTION_UDEBS=focal
 # WHICH DISTRIBUTION MUST I PICK UP THE INSTALLER SOURCE CODE
-DISTRIBUTION_INSTALLER=disco
-KERNEL="4.15.0-46"
+DISTRIBUTION_INSTALLER=focal
+KERNEL="5.4.0-26"
 # WHICH KERNEL USE FOR X86
 KERNEL_X86=$KERNEL
 # WHICH KERNEL USE FOR AMD64
@@ -145,6 +145,12 @@ case "$ARCH" in
 	KERNEL=$KERNEL_AMD64
 	;;
 
+    *64)
+	SRC_ARCH="fuentes_amd64"
+	ARCHNAME="amd64"
+	KERNEL=$KERNEL_AMD64
+	;;
+
     x*)
 	msg "Not implemented"
 	salida
@@ -159,8 +165,8 @@ get_original_netinstaller(){
     DEST="$INIT_DIR/netinstall_${ARCHNAME}_${KERNEL}"
     run mkdir -p $DEST
 
-    for arq in {amd64,i386}; do
-	    UPSTREAM_INSTALLER=$REPO_UPSTREAM_INSTALLER/main/installer-$arq/current/images
+    arq=amd64 
+	    UPSTREAM_INSTALLER=$REPO_UPSTREAM_INSTALLER/main/installer-$arq/current/legacy-images
 	    UPSTREAM_INSTALLER_FLAVOUR=$UPSTREAM_INSTALLER/netboot/ubuntu-installer/$arq
 	    
 	    if [ ! -f $DEST/distro-udeb-orig-$arq.list ]; then
@@ -172,7 +178,6 @@ get_original_netinstaller(){
 	    if [ ! -f $DEST/distro-initrd-$arq.gz ]; then
 		run_safe wget -q $UPSTREAM_INSTALLER_FLAVOUR/initrd.gz -O $DEST/distro-initrd-$arq.gz
 	    fi
-    done
 
 }
 
@@ -223,7 +228,7 @@ fi
 
 patch_netinstall(){
 # PATCH NETINSTALL
-DIR_INSTALLER=$(find ./$SRC_ARCH -maxdepth 1 -type d -name 'debian-installer*' -print |cut -d '/' -f3|uniq)
+DIR_INSTALLER=$(basename $(find ./$SRC_ARCH -maxdepth 1 -type d -name 'debian-installer*' -print))
 msg "Patching installer... "
 run pushd $SRC_ARCH/$DIR_INSTALLER
 reg="^$ARCHNAME.*"
